@@ -54,12 +54,28 @@ function Program_Switch(switchCase, flag = null) {
             console.log("help me");
             break;
         default:
-            console.log("help me");
+            console.log("whatever you did, didn't work...");
             break;
     }
-
 }
-
+function Update_And_Create_Articles() {
+    Get_KO_Articles();
+    Get_Intercom_Articles();   
+    //ProcessArticles(create, update)
+    ProcessArticles(true, true)
+}
+function UpdateArticlesOnly() {
+    Get_KO_Articles();
+    Get_Intercom_Articles();
+    //ProcessArticles(create, update)
+    ProcessArticles(false, true)
+}
+function CreatArticlesOnly() {
+    Get_KO_Articles();
+    Get_Intercom_Articles();
+    //ProcessArticles(create, update)
+    ProcessArticles(true, false)
+}
 async function Get_KO_Articles() {
     maxPages = 1;
     pageCount = 1;
@@ -77,7 +93,6 @@ async function Get_KO_Articles() {
     } while (pageCount < maxPages + 1)
     fs.appendFile(logFilePath, `}`, (err) => { });
 }
-
 async function Get_Intercom_Articles() {
     maxPages = 1;
     pageCount = 1;
@@ -95,23 +110,24 @@ async function Get_Intercom_Articles() {
     } while (pageCount < maxPages + 1)
     fs.appendFile(logFilePath, `}`, (err) => { });
 }
-
-async function ProcessArticles() {
+async function ProcessArticles(create, update) {
     for (let ko_article = 0; ko_article < ko_Response.length; ko_article++) {
         var exists = false;
         for (let i = 0; i < int_Response.length; i++) {
             LogInfo(`"Checking for article": "${ko_Response[ko_article][_articleTile]}..."`);
             if (ko_Response[ko_article][_articleTile].trim() === int_Response[i][_articleTile].trim()) {
-                LogInfo(`"Updating Article": "${ko_Response[ko_article][_articleTile]}"\n`);
-                await UpdateArticle(ko_article, _articleTile, i);
-                exists = true;
-                break;
+                if (update === true) {
+                    LogInfo(`"Updating Article": "${ko_Response[ko_article][_articleTile]}"\n`);
+                    await UpdateArticle(ko_article, _articleTile, i);
+                    exists = true;
+                    break;
+                }
             }
             else {
                 await setTimeout(function Waitfor() { }, 1000);
             }
         }
-        if (exists == false) {
+        if (exists == false && create === true) {
             LogInfo(`Creating article: ${ko_Response[ko_article][_articleTile]}...`);
             await CreateArticle(ko_article, _articleTile);
         }
@@ -121,7 +137,6 @@ async function ProcessArticles() {
         iterationCount++;
     }
 }
-
 async function UpdateArticle(ko_article, _articleTile, i) {
     const reply = await fetch(`https://api.intercom.io/articles/${int_Response[i][_articleID]}`, CreateHeader("Intercom", "PUT", JSON.stringify({
         body: ko_Response[ko_article][_articleBody].toString()
@@ -131,7 +146,6 @@ async function UpdateArticle(ko_article, _articleTile, i) {
     LogInfo(`"message":"Article Updated. Waiting..."`);
     await setTimeout(function Waitfor() { }, 5000)
 }
-
 async function CreateArticle(ko_article, _articleTile) {
     LogInfo(`"No article with matching title": "${ko_Response[ko_article][_articleTile]}", "Action":"Creating Article.."\n`);
     const reply = await fetch('https://api.intercom.io/articles', CreateHeader("Intercom", "POST", JSON.stringify({
@@ -145,7 +159,6 @@ async function CreateArticle(ko_article, _articleTile) {
     LogInfo(`"message":"Article Created. Waiting..."`);
     await setTimeout(function Waitfor() { }, 3000)
 }
-
 function CallAPI(headerType, requestMethod, apiUrl, ...apiArgs) {
     return new Promise((resolve, reject) => {
         if (apiArgs.length > 0) {
