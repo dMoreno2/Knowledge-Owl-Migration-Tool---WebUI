@@ -1,0 +1,74 @@
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    margin: 0px;
+}
+
+body #allContent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(51, 51, 51);
+    height: 100%;
+}
+
+#app {
+    width: 25%;
+    height: 100%;
+    background: rgb(3, 15, 47);
+    border-radius: 0px 15px 15px 0px;
+}
+
+#contents {
+    padding: 0px 5%;
+}
+
+h1, h2, h3, p {
+    color: white;
+    margin: 0.5em 0em;
+}
+
+#contents div {
+    background-color: rgb(32, 37, 67);
+    margin-top: 2%;
+    border-radius: 15px;
+    padding: 3% !important;
+}
+
+#articleToolPanel div {
+    display: grid;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(79, 79, 79);
+    border-image: initial;
+    border-radius: 5px;
+}
+button {
+    width: auto;
+    background-color: orange;
+    padding: 2% 10%;
+    border-radius: 5px;
+}
+
+input {
+    margin-right: 10px;
+    padding: 5px;
+}
+
+#console {
+    width: 75%;
+    height: 100%;
+    padding: 0px 1%;
+}
+
+#output {
+    height: 85%;
+    overflow-y: scroll;
+    background-color: rgb(255, 255, 255) !important;
+    border-width: 2px;
+    border-style: solid;
+    border-color: black;
+    border-image: initial;
+    border-radius: 5px;
+    padding: 2%;
+}

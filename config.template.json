@@ -1,0 +1,16 @@
+{
+    "Knowledge_Owl": {
+        "API_Key": "YOUR_API_KEY_HERE",
+        "Project_ID": "YOUR_PROJECT_ID_HERE",
+        "Password": "YOUR_USER_PASSWORD_HERE",
+        "Search_URL": "https://app.knowledgeowl.com/api/head/article",
+        "Get_URL": "https://app.knowledgeowl.com/api/head/article/"
+    },
+    "Intercom": {
+        "Search_URL": "https://api.intercom.io/articles/search",
+        "Create_URL": "https://api.intercom.io/articles",
+        "Bearer_Token": "YOUR_BEARER_TOKEN_HERE",
+        "Client_ID":"YOUR_CLIENT_ID_HERE",
+        "Client_Secret":"YOUR_CLIENT_SECRET_HERE"
+    }
+}
