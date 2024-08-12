@@ -36,19 +36,21 @@ function StartServer() {
     else if (req.method === 'POST') {
       if (req.url === '/update&Create') {
         Output("Updating and Creating new articles");
-        Program_Switch(443);
+        Program_Switch(1);
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.write("Updating and Creating new articles");
         res.end();
       }
       else if (req.url === '/updateOnly') {
-        Output("Updating all articles");
+        Output("Updating all articles");        
+        Program_Switch(2);
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.write("Updating all articles");
         res.end();
       }
       else if (req.url === '/createOnly') {
-        Output("Creating new articles");
+        Output("Creating new articles");       
+        Program_Switch(3);
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.write("Creating new articles");
         res.end();

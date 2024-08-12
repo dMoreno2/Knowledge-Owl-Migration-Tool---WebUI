@@ -34,7 +34,7 @@ catch (error) {
     LogInfo(error);
 }
 
-function Program_Switch(switchCase, flag = null) {
+function Program_Switch(switchCase) {
 
     switch (switchCase) {
         case 1:
