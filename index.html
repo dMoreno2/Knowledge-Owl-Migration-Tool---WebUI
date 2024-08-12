@@ -1,49 +1,69 @@
-<html lang="en"><head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Knowledge Owl Migration Tool</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20448%20512'%3E%3Cpath%20d='M448%2073.143v45.714c0%2035.346-100.29%2064-224%2064S0%20154.203%200%20118.857V73.143C0%2037.797%20100.29%209.143%20224%209.143s224%2028.654%20224%2064zM0%20162.286v45.714C0%20243.346%20100.29%20272%20224%20272s224-28.654%20224-64V162.286C404.184%20181.298%20316.319%20192%20224%20192S43.816%20181.298%200%20162.286zM0%20251.429v45.714C0%20332.346%20100.29%20361%20224%20361s224-28.654%20224-64V251.429C404.184%20270.441%20316.319%20281.143%20224%20281.143S43.816%20270.441%200%20251.429zM224%20473.143c-123.71%200-224-28.654-224-64v-45.714C43.816%20422.702%20131.681%20432%20224%20432s180.184-9.298%20224-28.571v45.714c0%2035.346-100.29%2064-224%2064z'/%3E%3C/svg%3E">
-</head>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20448%20512'%3E%3Cpath%20d='M448%2073.143v45.714c0%2035.346-100.29%2064-224%2064S0%20154.203%200%20118.857V73.143C0%2037.797%20100.29%209.143%20224%209.143s224%2028.654%20224%2064zM0%20162.286v45.714C0%20243.346%20100.29%20272%20224%20272s224-28.654%20224-64V162.286C404.184%20181.298%20316.319%20192%20224%20192S43.816%20181.298%200%20162.286zM0%20251.429v45.714C0%20332.346%20100.29%20361%20224%20361s224-28.654%20224-64V251.429C404.184%20270.441%20316.319%20281.143%20224%20281.143S43.816%20270.441%200%20251.429zM224%20473.143c-123.71%200-224-28.654-224-64v-45.714C43.816%20422.702%20131.681%20432%20224%20432s180.184-9.298%20224-28.571v45.714c0%2035.346-100.29%2064-224%2064z'/%3E%3C/svg%3E"
+    />
+  </head>
 
-<body class="vsc-initialized">
+  <body class="vsc-initialized">
     <div id="allContent">
-        <div id="app">
-            <div id="contents">
-                <h2>Knowledge Owl Migration Tool</h2>
-                <div id="articleToolPanel">
-                    <div>
-                        <h3>Update and Create</h3>
-                        <button id="update_create">Submit</button>
-                    </div>
-                    <div>
-                        <h3>Update Only</h3>
-                        <button id="update">Submit</button>
-                    </div>
-                    <div>
-                        <h3>Create New Articles Only</h3>
-                        <button id="create">Submit</button>
-                    </div>
-                </div>
-                <div>
-                    <h3>Update Specific Article</h3>
-                    <input type="text" id="update_id" placeholder="Enter KO Article ID...">
-                    <button id="updateSpecific">Submit</button>
-                </div>
-                <div>
-                    <h3>Delete Article in Intercom</h3>
-                    <input type="text" id="remove_article_id" placeholder="Enter KO Article ID...">
-                    <button id="delete">Submit</button>
-                </div>
-
+      <div id="app">
+        <div id="contents">
+          <h2>Knowledge Owl Migration Tool</h2>
+          <div id="articleToolPanel">
+            <div>
+              <h3>Update and Create Articles in Intercom</h3>
+              <button id="update_create">Submit</button>
             </div>
+            <div>
+              <h3>Update Articles in Intercom</h3>
+              <button id="update">Submit</button>
+            </div>
+            <div>
+              <h3>Create New Articles in Intercom</h3>
+              <button id="create">Submit</button>
+            </div>
+          </div>
+          <div>
+            <h3>Update Specific Article in Intercom</h3>
+            <input
+              type="text"
+              id="update_id"
+              placeholder="Enter KO Article ID..."
+            />
+            <button id="updateSpecific">Submit</button>
+          </div>
+          <div>
+            <h3>Create Specific Article in Intercom</h3>
+            <input
+              type="text"
+              id="update_id"
+              placeholder="Enter KO Article ID..."
+            />
+            <button id="createSpecific">Submit</button>
+          </div>
+          <div>
+            <h3>Delete Article in Intercom</h3>
+            <input
+              type="text"
+              id="remove_article_id"
+              placeholder="Enter KO Article ID..."
+            />
+            <button id="delete">Submit</button>
+          </div>
         </div>
-        <div id="console">
-            <h3>Console Output</h3>
-            <div id="output"></div>
-        </div>
+      </div>
+      <div id="console">
+        <h3>Console Output</h3>
+        <pre id="output"></pre>
+      </div>
     </div>
     <script src="main.js"></script>
-
-
-</body></html>
+  </body>
+</html>
