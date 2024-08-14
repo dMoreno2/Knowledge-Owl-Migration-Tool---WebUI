@@ -157,6 +157,7 @@ async function Get_Intercom_Articles() {
   } while (pageCount < maxPages + 1);
   fs.appendFile(logFilePath, `}`, (err) => { });
 }
+
 async function ProcessArticles(create, update) {
   for (let ko_article = 0; ko_article < ko_Response.length; ko_article++) {
     var exists = false;
@@ -189,6 +190,7 @@ async function ProcessArticles(create, update) {
     iterationCount++;
   }
 }
+
 async function UpdateArticle(ko_article, _articleTile, i) {
   const reply = await fetch(
     `https://api.intercom.io/articles/${int_Response[i][_articleID]}`,
@@ -205,6 +207,7 @@ async function UpdateArticle(ko_article, _articleTile, i) {
   LogInfo(`"message":"Article Updated. Waiting..."`);
   await setTimeout(function Waitfor() { }, 5000);
 }
+
 async function CreateArticle(ko_article, _articleTile) {
   LogInfo(
     `"No article with matching title": "${ko_Response[ko_article][_articleTile]}", "Action":"Creating Article.."\n`
@@ -227,6 +230,7 @@ async function CreateArticle(ko_article, _articleTile) {
   LogInfo(`"message":"Article Created. Waiting..."`);
   await setTimeout(function Waitfor() { }, 3000);
 }
+
 function CallAPI(headerType, requestMethod, apiUrl, ...apiArgs) {
   return new Promise((resolve, reject) => {
     if (apiArgs.length > 0) {
@@ -285,6 +289,7 @@ function CallAPI(headerType, requestMethod, apiUrl, ...apiArgs) {
       });
   });
 }
+
 function CreateHeader(system, requestMethod, bodyValues = null) {
   var requestOptions;
   switch (system) {
@@ -313,6 +318,7 @@ function CreateHeader(system, requestMethod, bodyValues = null) {
       return requestOptions;
   }
 }
+
 async function LogInfo(logContents) {
   const output = await fs.appendFile(
     logFilePath,
@@ -321,6 +327,7 @@ async function LogInfo(logContents) {
   );
   Output(logContents);
 }
+
 function GetDateTime() {
   const currentDate = new Date();
   //DD-MM-YY--HH-MM-SS
