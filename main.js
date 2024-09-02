@@ -72,57 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     });
 
-    //update only specified articles
-    updateSpecific.addEventListener('click', () => {
-        const inputValue = update_id.value;
-        if (!inputValue) {
-            alert(`PLEASE ENTER VALUE `);
-            output.textContent = '';
-            return new Promise(resolve => setTimeout(resolve, 3000));
-        }
-        else {
-            DisableButtons(true);
-            fetch(`/updateSpecific/${inputValue}`, { method: 'POST' })
-                .then(response => { return response.text() })
-                .then(resp => {
-                    console.log(resp);
-                    return new Promise(resolve => setTimeout(resolve, 3000));
-                })
-                .catch(error => console.error('Error trying to update article', error))
-                .finally(() => {
-                    DisableButtons(false);
-                });
-        }
-    });
-
-    //remove article from intercom
-    deleteArticle.addEventListener('click', () => {
-        const inputValue = remove_article_id.value;
-        if (!inputValue) {
-            alert(`PLEASE ENTER VALUE `);
-            return new Promise(resolve => setTimeout(resolve, 3000));
-        }
-        else {
-            output.textContent += `${inputValue}`;
-            fetch(`/removeSpecific/${inputValue}`, { method: 'POST' })
-                .then(response => { return response.text() })
-                .then(resp => {
-                    console.log(resp);
-                    return new Promise(resolve => setTimeout(resolve, 3000));
-                })
-                .catch(error => console.error('Error trying to delete article', error))
-                .finally(() => {
-                    DisableButtons(false);
-                });
-        }
-    });
-
     function DisableButtons(state) {
         //console.log('something happened');
         update_create.disabled = state;
         update.disabled = state;
         create.disabled = state;
-        updateSpecific.disabled = state;
-        deleteArticle.disabled = state;
     }
 });

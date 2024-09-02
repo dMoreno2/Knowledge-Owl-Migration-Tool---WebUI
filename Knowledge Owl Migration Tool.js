@@ -21,16 +21,14 @@ let _articleTile = 0; /// ko_Response [0] - Article Title - int_Response [0]
 let _articleBody = 1; /// ko_Response [1] - Article Body  - int_Response [1]
 let _articleID = 2;   /// ko_Response [2] - Article ID    - int_Response [2]
 try {
-    fs.readFile("config.json", 'utf8', (error, data) => {
-        configFile = JSON.parse(data);
-        for (let key in configFile) {
-            if (configFile[key] === null) {
-                throw "Check .config file for null values";
-            }
+    const data = fs.readFileSync("config.json", 'utf8');
+    configFile = JSON.parse(data);
+    for (let key in configFile) {
+        if (configFile[key] === null) {
+            throw "Check .config file for null values";
         }
-    });
-}
-catch (error) {
+    }
+} catch (error) {
     LogInfo(error);
 }
 
@@ -58,23 +56,26 @@ function Program_Switch(switchCase) {
             break;
     }
 }
-function Update_And_Create_Articles() {
-    Get_KO_Articles();
-    Get_Intercom_Articles();   
+async function Update_And_Create_Articles() {
+    await Get_KO_Articles();
+    await Get_Intercom_Articles();
     //ProcessArticles(create, update)
-    ProcessArticles(true, true)
+    ProcessArticles(true, true);
+    LogInfo("Final:Processing Complete");
 }
-function UpdateArticlesOnly() {
-    Get_KO_Articles();
-    Get_Intercom_Articles();
+async function UpdateArticlesOnly() {
+    await Get_KO_Articles();
+    await Get_Intercom_Articles();
     //ProcessArticles(create, update)
-    ProcessArticles(false, true)
+    ProcessArticles(false, true);
+    LogInfo("Final:Processing Complete");
 }
-function CreatArticlesOnly() {
-    Get_KO_Articles();
-    Get_Intercom_Articles();
+async function CreatArticlesOnly() {
+    await Get_KO_Articles();
+    await Get_Intercom_Articles();
     //ProcessArticles(create, update)
-    ProcessArticles(true, false)
+    ProcessArticles(true, false);    
+    LogInfo("Final:Processing Complete");
 }
 async function Get_KO_Articles() {
     maxPages = 1;
@@ -115,13 +116,13 @@ async function ProcessArticles(create, update) {
         var exists = false;
         for (let i = 0; i < int_Response.length; i++) {
             LogInfo(`"Checking for article": "${ko_Response[ko_article][_articleTile]}..."`);
-            if (ko_Response[ko_article][_articleTile].trim() === int_Response[i][_articleTile].trim()) {
+            if (ko_Response[ko_article][_articleTile].replace(/\s+/g, '') === int_Response[i][_articleTile].replace(/\s+/g, '')) {
                 if (update === true) {
                     LogInfo(`"Updating Article": "${ko_Response[ko_article][_articleTile]}"\n`);
                     await UpdateArticle(ko_article, _articleTile, i);
-                    exists = true;
                     break;
                 }
+                exists = true;
             }
             else {
                 await setTimeout(function Waitfor() { }, 1000);
