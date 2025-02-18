@@ -1,4 +1,6 @@
 #Ignore these files.
 config.json
+testConfig.json
 *.txt
 log*.json
+.archive

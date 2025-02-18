@@ -1,31 +1,25 @@
+module.exports = { Add_To_Server_Queue };
+
 var http = require('http');
 var fs = require('fs');
 var os = require('os');
 var path = require('path');
-const { Program_Switch } = require('./Knowledge Owl Migration Tool.js');
 
-if (!fs.existsSync('logs')) {
-  fs.mkdirSync('logs');
-}
+const { Program_Switch } = require('./Utilities/Migration Tool.js');
+const { LogInfo } = require('./Utilities/Logger.js');
 
-const logFilePath = path.join(path.join(__dirname, 'logs'), `log-${GetDateTime()}.json`);
-
-var port = 5555;
-var log_to_file_queue = [];
-
+var port = 9929; //Math.floor(Math.random() * (8000 - 5000 + 1)) + 5000;
 const localIP = getLocalIP();
-const originalConsoleLog = console.log;
-
-console.log = function (message) {
-  // Call the original console.log function
-  originalConsoleLog.apply(console, arguments);
-};
+const log_to_server_queue = [];
 
 function StartServer() {
   const server = http.createServer((req, res) => {
     const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-    Output(`Requested URL: ${req.url} at: ${clientIP}`);
+    //LogInfo(`Requested URL: ${req.url} at: ${clientIP}`);
+    if (req.url !== "/events") {
+      LogInfo(`Requested URL: ${req.url} at: ${clientIP}`);
+    }
 
     if (req.method === 'GET') {
       const filePath = `.${req.url === '/' ? '/index.html' : req.url}`;
@@ -35,27 +29,70 @@ function StartServer() {
 
     else if (req.method === 'POST') {
       if (req.url === '/update&Create') {
-        Output("Updating and Creating new articles");
-        Program_Switch(1);
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.write("Updating and Creating new articles");
-        res.end();
-      }
-      else if (req.url === '/updateOnly') {
-        Output("Updating all articles");        
-        Program_Switch(2);
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.write("Updating all articles");
-        res.end();
-      }
-      else if (req.url === '/createOnly') {
-        Output("Creating new articles");       
-        Program_Switch(3);
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.write("Creating new articles");
-        res.end();
-      }
-      else {
+        LogInfo("Updating and Creating new articles");
+        Program_Switch(1).then(result => {
+          if (result) {
+            LogInfo("Update & Create operation completed.");
+            res.writeHead(200, { "Content-Type": "text/plain" });
+            res.write('event: disableButtons');
+            res.end();
+          }
+        });
+      } else if (req.url === '/updateOnly') {
+        LogInfo("Updating all articles");
+        Program_Switch(2).then(result => {
+          if (result) {
+            LogInfo("Update operation completed.");
+            res.writeHead(200, { "Content-Type": "text/plain" });
+            res.write('event: disableButtons');
+            res.end();
+          }
+        });
+      } else if (req.url === '/createOnly') {
+        LogInfo("Creating new articles");
+        Program_Switch(3).then(result => {
+          if (result) {
+            LogInfo("Create operation completed.");
+            res.writeHead(200, { "Content-Type": "text/plain" });
+            res.write('event: disableButtons');
+            res.end();
+          }
+        });
+      } else if (req.url.includes("/updateSpecific")) {
+        const inputValue = req.url.split("/")[2];
+        LogInfo(`Updating article ${inputValue}`);
+        Program_Switch(2, inputValue).then(result => {
+          if (result) {
+            LogInfo("Update Specific operation completed.");
+            res.writeHead(200, { "Content-Type": "text/plain" });
+            res.write('event: disableButtons');
+            res.end();
+          }
+        });
+      } else if (req.url.includes("/createSpecific")) {
+        const inputValue = req.url.split("/")[2];
+        LogInfo(`Creating article ${inputValue}`);
+        Program_Switch(3, inputValue).then(result => {
+          if (result) {
+            LogInfo("Create Specific operation completed.");
+            res.writeHead(200, { "Content-Type": "text/plain" });
+            res.write('event: disableButtons');
+            res.end();
+          }
+        });
+      } else if (req.url.includes("/removeSpecific")) {
+        
+      } else if (req.url === "/events") {
+        if (log_to_server_queue.length > 0) {
+          res.writeHead(200, { "Content-Type": "text/plain" });
+          res.write(log_to_server_queue + '\n');
+          log_to_server_queue.shift();
+          res.end();
+        }
+        else {
+          res.end();
+        }
+      } else {
         // Invalid POST request
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Invalid POST request');
@@ -64,19 +101,19 @@ function StartServer() {
   });
 
   server.listen(port, localIP, () => {
-    Output(`Server on http://${localIP}:${port}`);
+    LogInfo(`Server on http://${localIP}:${port}`);
     //Output(`Server on http://127.0.0.1:${port}`);
   });
 
   server.on('error', (e) => {
     if (e.code === 'EADDRINUSE') {
       let randomValue = Math.floor(Math.random() * (8000 - 5000 + 1)) + 5000;
-      Output(`Port ${port} is already in use. Changing port to ${randomValue}`);
+      LogInfo(`Port ${port} is already in use. Changing port to ${randomValue}`);
       port = randomValue;
       StartServer();
     }
     else {
-      console.log(e.code);
+      LogInfo(e.code);
     }
   });
 }
@@ -103,7 +140,6 @@ function getContentType(filePath) {
     '.js': 'application/javascript',
     '.mp4': 'video/mp4',
   };
-
   return mimeTypes[extname] || 'application/octet-stream';
 }
 
@@ -128,28 +164,8 @@ function serveStaticFile(filePath, contentType, res) {
   });
 }
 
-function Output(outputData) {
-  console.log(outputData.toString());
-  log_to_file_queue.push(outputData.toString());
+function Add_To_Server_Queue(val) {
+  log_to_server_queue.push(val);
 }
 
-async function LogData() {
-  while (true) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    if (log_to_file_queue.length > 0) {
-      await fs.appendFile(logFilePath, `"${GetDateTime()}":${JSON.stringify(log_to_file_queue[0], null, 2)}\n`, (err) => { });
-      log_to_file_queue.shift();
-    }
-  }
-}
-
-function GetDateTime() {
-  const currentDate = new Date();
-  //DD-MM-YY--HH-MM-SS
-  const now = `${currentDate.getDate()}-${currentDate.getMonth() + 1}-${currentDate.getFullYear()}--${currentDate.getHours()}-${currentDate.getMinutes()}-${currentDate.getSeconds()}`;
-  return now
-}
-
-
-LogData();
 StartServer();
