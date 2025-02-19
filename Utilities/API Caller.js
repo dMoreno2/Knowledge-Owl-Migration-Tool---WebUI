@@ -72,6 +72,7 @@ function CallAPI(headerType, requestMethod, bodyValues = null, additional_header
                     .then(data => {
                         clearTimeout(timeoutId); // Only called on success
                         resolve(data);
+                        LogInfo(`Response: ${data}`);
                     });
                 break;
                 // .catch(error => {
