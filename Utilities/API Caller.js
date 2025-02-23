@@ -114,22 +114,14 @@ async function Get_MultiPage_Request(Call_Object,) {
             content.push(resp.data);
         }
         LogInfo(`"message":"${Call_Object.headerType} ${pageCount}"`);
-        new Promise(resolve => setTimeout(resolve, 5)); // Simulates async work
+        new Promise(resolve => setTimeout(resolve, 5));
     }
     return content;
 }
 
-//returns the json.
 async function Test_API_Caller() {
     var something = await CallAPI('TEST', 'GET', null, null, 'https://httpbin.org/json');
     console.log(JSON.stringify(something, null, 2));
 }
 
-async function Call_Test() {
-    const link = "https://app.knowledgeowl.com/api/head/article/6477c45857fb5905ec22a946";
-    var something = await CallAPI('Knowledge_Owl', 'GET', null, null, link);
-    console.log(JSON.stringify(something, null, 2));
-}
-
 //Test_API_Caller();
-//Call_Test();
