@@ -73,10 +73,10 @@ async function Update_And_Create_Articles() {
     LogInfo("Final:Processing Complete");
 }
 async function Update_Articles_Only(id) {
-    await Get_KO_Articles(id);
+    source_Articles = await Get_KO_Articles(id);
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
 
-    await Get_Int_Articles();
+    dest_Articles = await Get_Int_Articles();
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
 
     await ReplaceSnippets(await GetSnippets());
@@ -88,10 +88,10 @@ async function Update_Articles_Only(id) {
     LogInfo("Final:Processing Complete");
 }
 async function Create_Articles_Only(id) {
-    await Get_KO_Articles(id);
+    source_Articles = await Get_KO_Articles(id);
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
 
-    await Get_Int_Articles();
+    dest_Articles = await Get_Int_Articles();
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
 
     await ReplaceSnippets(await GetSnippets());
@@ -108,7 +108,7 @@ async function DeleteArticle(id) {
     //So I won't build it
 }
 async function Get_KO_Articles(id = '') {
-    source_Articles = await Get_MultiPage_Request({
+    return await Get_MultiPage_Request({
         headerType: "Knowledge_Owl",
         queryMethod: "GET",
         additional_Headers: {
@@ -132,7 +132,7 @@ async function Get_Int_Articles(id = '') {
         URL: `${configFile.Intercom.Create_URL}`,
         ID: `${id}`,
     });
-    dest_Articles = resp.flat();
+    return resp.flat();
 }
 async function ProcessArticles(create, update) {
     let { articlesToUpdate, articlesToCreate } = await Return_Update_and_Create_Articles();
