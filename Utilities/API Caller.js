@@ -24,6 +24,7 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
         Knowledge_Owl: {
             method: requestMethod,
             headers: {
+                'Content-Type': 'application/json',
                 ...additionalHeaderValues,
             },
             body: bodyValues ? JSON.stringify(bodyValues) : null,
@@ -72,7 +73,7 @@ function CallAPI(headerType, requestMethod, bodyValues = null, additional_header
                     .then(data => {
                         clearTimeout(timeoutId); // Only called on success
                         resolve(data);
-                        LogInfo(`Response: ${data}`);
+                        //LogInfo(`Response: ${data}`);
                     });
                 break;
                 // .catch(error => {
@@ -111,7 +112,12 @@ async function Get_MultiPage_Request(Call_Object,) {
                 ;
             }
         } else {
-            content.push(resp.data);
+            if (Call_Object.headerType !== 'Knowledge_Owl' && Call_Object.ID !== null) {
+                content.push(resp);
+            }
+            else {
+                content.push(resp.data);
+            }
         }
         LogInfo(`"message":"${Call_Object.headerType} ${pageCount}"`);
         new Promise(resolve => setTimeout(resolve, 5));
