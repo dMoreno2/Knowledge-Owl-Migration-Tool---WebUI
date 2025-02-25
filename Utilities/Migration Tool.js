@@ -73,32 +73,35 @@ async function Update_And_Create_Articles() {
     LogInfo("Final:Processing Complete");
 }
 async function Update_Articles_Only(id) {
+
+    //swap the source and dest articles and put ID in Get_Int_Articles to switch from KO to Int --> to INT to KO
+    //remember to disable the get snippets function.
     source_Articles = await Get_KO_Articles(id);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
 
     dest_Articles = await Get_Int_Articles();
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
 
-    await ReplaceSnippets(await GetSnippets());
+    //await ReplaceSnippets(await GetSnippets());
 
     //ProcessArticles(create, update)
     await ProcessArticles(false, true);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
 
     LogInfo("Final:Processing Complete");
 }
 async function Create_Articles_Only(id) {
     source_Articles = await Get_KO_Articles(id);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
 
     dest_Articles = await Get_Int_Articles();
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
 
     await ReplaceSnippets(await GetSnippets());
 
     //ProcessArticles(create, update)
     await ProcessArticles(true, false);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
 
     LogInfo("Final:Processing Complete");
 }
@@ -108,7 +111,7 @@ async function DeleteArticle(id) {
     //So I won't build it
 }
 async function Get_KO_Articles(id = '') {
-    return await Get_MultiPage_Request({
+    let resp = await Get_MultiPage_Request({
         headerType: "Knowledge_Owl",
         queryMethod: "GET",
         additional_Headers: {
@@ -121,6 +124,7 @@ async function Get_KO_Articles(id = '') {
             status: 'published'
         }
     });
+    return resp;
 }
 async function Get_Int_Articles(id = '') {
     let resp = await Get_MultiPage_Request({
@@ -130,9 +134,9 @@ async function Get_Int_Articles(id = '') {
             'Authorization': `Bearer ${configFile.Intercom.Bearer_Token}`,
         },
         URL: `${configFile.Intercom.Create_URL}`,
-        ID: `${id}`,
+        ID: id ? `/${id}` : null,  // Corrected logic for ID
     });
-    return resp.flat();
+    return id ? resp : resp.flat();
 }
 async function ProcessArticles(create, update) {
     let { articlesToUpdate, articlesToCreate } = await Return_Update_and_Create_Articles();
@@ -153,9 +157,10 @@ async function Return_Update_and_Create_Articles() {
 
     for (let sourceArticle of source_Articles) {
         let found = false;
-
+        const source_article_title = sourceArticle.current_version?.en?.title || sourceArticle.title;
         for (let dest_Article of dest_Articles) {
-            if (sourceArticle.current_version.en.title.replace(/\s+/g, '') === dest_Article.title.replace(/\s+/g, '')) {
+            const dest_article_title = dest_Article.current_version?.en?.title || dest_Article.title;
+            if (source_article_title.replace(/\s+/g, '') === dest_article_title.replace(/\s+/g, '')) {
                 articlesToUpdate.push({ ...sourceArticle, external_id: dest_Article.id });
                 found = true;
                 break;
@@ -168,22 +173,34 @@ async function Return_Update_and_Create_Articles() {
     return { articlesToCreate, articlesToUpdate };
 }
 async function Update_An_Article(article) {
+    const isIntercom = article.current_version?.en?.title;
+    const cleanedBody = `${(article.current_version?.en?.text || article.body || '').replace(/\n/g, '')}`;
+
+    // Conditionally set the body, current_version, and project_id based on the headerType
+    const additionalBody = {
+        //body: isIntercom ? cleanedBody:undefined,
+        name: isIntercom ? undefined:article.current_version?.en?.title || article.title,
+        current_version: isIntercom ? undefined : cleanedBody,
+        project_id: isIntercom ? undefined : `${configFile.Knowledge_Owl.Project_ID}`
+    };
+
     await Get_MultiPage_Request({
-        headerType: "Intercom",
+        headerType: isIntercom ? "Intercom" : "Knowledge_Owl",
         queryMethod: "PUT",
-        additional_Body: {
-            body: article.current_version.en.text
-        },
+        additional_Body: additionalBody,
         additional_Headers: {
-            'Authorization': `Bearer ${configFile.Intercom.Bearer_Token}`,
+            'Authorization': isIntercom ? `Bearer ${configFile.Intercom.Bearer_Token}` : `Basic ${btoa(`${configFile.Knowledge_Owl.API_Key}:${configFile.Knowledge_Owl.Password}`)}`
         },
-        URL: `${configFile.Intercom.Create_URL}/`,
-        ID: `${article.external_id}`
+        URL: isIntercom ? `${configFile.Intercom.Create_URL}/` : `${configFile.Knowledge_Owl.Get_URL}`,
+        ID: isIntercom? `${article.external_id}`:`${article.external_id}.json`,
     });
     // const data = await reply.json();
     // LogInfo(JSON.stringify(data, null, 2) + '\n', 'blue');
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
+    await new Promise(resolve => setTimeout(resolve, 1000));
 }
+
+
+//still needs ot have alternatives set for creating article accross into KO
 async function Create_An_Article(article) {
     await Get_MultiPage_Request({
         headerType: "Intercom",
@@ -194,14 +211,14 @@ async function Create_An_Article(article) {
         URL: `${configFile.Intercom.Create_URL}`,
         additional_Body: {
             author_id: 7491322,
-            title: article.current_version.en.title,
-            body: article.current_version.en.body,
+            title: article.current_version.en.title || article.title,
+            body: article.current_version.en.body || article.body,
             state: 'draft'
         }
     });
     // const data = await reply.json();
     // LogInfo(JSON.stringify(data, null, 2) + '\n', 'blue');
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulates async work
+    await new Promise(resolve => setTimeout(resolve, 1000)); 
 }
 async function GetSnippets() {
     try {
@@ -239,7 +256,7 @@ function ReplaceSnippets(snippetData) {
                 // Perform the replacement
                 source_Articles[sourceIndex].current_version.en.text = source_Articles[sourceIndex].current_version.en.text.replace(regex, snippetData[index].current_version.en);
             }
-            new Promise(resolve => setTimeout(resolve, 5)); // Simulates async work
+            new Promise(resolve => setTimeout(resolve, 5)); 
         }
     }
 }
@@ -259,12 +276,12 @@ function ReplaceArticleLinks() {
                             .replaceAll(`href=\"https://eahelp.eventsair.com/home${source_Articles[b][_articleLink]}`, dest_Articles[intArticle][_articleLink]);
                         source_Articles[sourceIndex][_articleBody] = newBody;
                     }
-                    new Promise(resolve => setTimeout(resolve, 5)); // Simulates async work
+                    new Promise(resolve => setTimeout(resolve, 5)); 
                 }
             }
-            new Promise(resolve => setTimeout(resolve, 5)); // Simulates async work
+            new Promise(resolve => setTimeout(resolve, 5)); 
         }
-        new Promise(resolve => setTimeout(resolve, 1)); // Simulates async work
+        new Promise(resolve => setTimeout(resolve, 1)); 
     }
 }
 async function TestAPI() {
