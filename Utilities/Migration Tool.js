@@ -82,7 +82,7 @@ async function Update_Articles_Only(id) {
     dest_Articles = await Get_Int_Articles();
     await new Promise(resolve => setTimeout(resolve, 1000)); 
 
-    //await ReplaceSnippets(await GetSnippets());
+    await ReplaceSnippets(await GetSnippets());
 
     //ProcessArticles(create, update)
     await ProcessArticles(false, true);
