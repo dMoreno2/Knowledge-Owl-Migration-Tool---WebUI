@@ -17,9 +17,9 @@ function StartServer() {
     const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
     //LogInfo(`Requested URL: ${req.url} at: ${clientIP}`);
-    if (req.url !== "/events") {
+    //if (req.url !== "/events") {
       LogInfo(`Requested URL: ${req.url} at: ${clientIP}`);
-    }
+    //}
 
     if (req.method === 'GET') {
       const filePath = `.${req.url === '/' ? '/index.html' : req.url}`;
@@ -82,16 +82,16 @@ function StartServer() {
         });
       } else if (req.url.includes("/removeSpecific")) {
         
-      } else if (req.url === "/events") {
-        if (log_to_server_queue.length > 0) {
-          res.writeHead(200, { "Content-Type": "text/plain" });
-          res.write(log_to_server_queue + '\n');
-          log_to_server_queue.shift();
-          res.end();
-        }
-        else {
-          res.end();
-        }
+      // } else if (req.url === "/events") {
+      //   if (log_to_server_queue.length > 0) {
+      //     res.writeHead(200, { "Content-Type": "text/plain" });
+      //     res.write(log_to_server_queue + '\n');
+      //     log_to_server_queue.shift();
+      //     res.end();
+      //   }
+      //   else {
+      //     res.end();
+      //   }
       } else {
         // Invalid POST request
         res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -102,7 +102,6 @@ function StartServer() {
 
   server.listen(port, localIP, () => {
     LogInfo(`Server on http://${localIP}:${port}`);
-    //Output(`Server on http://127.0.0.1:${port}`);
   });
 
   server.on('error', (e) => {
@@ -167,5 +166,9 @@ function serveStaticFile(filePath, contentType, res) {
 function Add_To_Server_Queue(val) {
   log_to_server_queue.push(val);
 }
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
 
 StartServer();
