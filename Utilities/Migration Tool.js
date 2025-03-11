@@ -4,6 +4,8 @@ const { CallAPI } = require('./API Caller.js');
 const { Get_MultiPage_Request } = require('./API Caller.js');
 
 const fs = require('fs');
+const { title } = require('process');
+const { reverse } = require('dns');
 
 var configFile;
 var maxPages = 1;
@@ -12,6 +14,7 @@ var source_Articles = [];
 var dest_Articles = [];
 
 var TESTMODE = false;
+var reverseProgam = true;
 try {
     var data;
     if (!TESTMODE) {
@@ -74,34 +77,51 @@ async function Update_And_Create_Articles() {
 }
 async function Update_Articles_Only(id) {
 
-    //swap the source and dest articles and put ID in Get_Int_Articles to switch from KO to Int --> to INT to KO
-    //remember to disable the get snippets function.
-    source_Articles = await Get_KO_Articles(id);
-    await new Promise(resolve => setTimeout(resolve, 1000)); 
+    if (!reverseProgam) {
+        //for KO to Intercom
+        source_Articles = await Get_KO_Articles(id);
+        await new Promise(resolve => setTimeout(resolve, 50));
+        dest_Articles = await Get_Int_Articles();
+        await new Promise(resolve => setTimeout(resolve, 50));
+        await ReplaceSnippets(await GetSnippets());
+    }
 
-    dest_Articles = await Get_Int_Articles();
-    await new Promise(resolve => setTimeout(resolve, 1000)); 
-
-    await ReplaceSnippets(await GetSnippets());
+    if (reverseProgam) {
+        //for Intercom to KO
+        dest_Articles = await Get_KO_Articles();
+        await new Promise(resolve => setTimeout(resolve, 50));
+        source_Articles = await Get_Int_Articles(id);
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
 
     //ProcessArticles(create, update)
     await ProcessArticles(false, true);
-    await new Promise(resolve => setTimeout(resolve, 1000)); 
+    await new Promise(resolve => setTimeout(resolve, 50));
 
     LogInfo("Final:Processing Complete");
 }
 async function Create_Articles_Only(id) {
-    source_Articles = await Get_KO_Articles(id);
-    await new Promise(resolve => setTimeout(resolve, 1000)); 
 
-    dest_Articles = await Get_Int_Articles();
-    await new Promise(resolve => setTimeout(resolve, 1000)); 
+    if (!reverseProgam) {
+        //for KO to Intercom
+        source_Articles = await Get_KO_Articles(id);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        dest_Articles = await Get_Int_Articles();
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await ReplaceSnippets(await GetSnippets());
+    }
 
-    await ReplaceSnippets(await GetSnippets());
+    if (reverseProgam) {
+        //for Intercom to KO
+        dest_Articles = await Get_KO_Articles();
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        source_Articles = await Get_Int_Articles(id);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
 
     //ProcessArticles(create, update)
     await ProcessArticles(true, false);
-    await new Promise(resolve => setTimeout(resolve, 1000)); 
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     LogInfo("Final:Processing Complete");
 }
@@ -179,8 +199,10 @@ async function Update_An_Article(article) {
     // Conditionally set the body, current_version, and project_id based on the headerType
     const additionalBody = {
         //body: isIntercom ? cleanedBody:undefined,
-        name: isIntercom ? undefined:article.current_version?.en?.title || article.title,
+        name: isIntercom ? undefined : article.current_version?.en?.title || article.title,
+        title: isIntercom ? isIntercom : undefined,
         current_version: isIntercom ? undefined : cleanedBody,
+        body: isIntercom ? article.current_version?.en?.text : undefined,
         project_id: isIntercom ? undefined : `${configFile.Knowledge_Owl.Project_ID}`
     };
 
@@ -192,7 +214,7 @@ async function Update_An_Article(article) {
             'Authorization': isIntercom ? `Bearer ${configFile.Intercom.Bearer_Token}` : `Basic ${btoa(`${configFile.Knowledge_Owl.API_Key}:${configFile.Knowledge_Owl.Password}`)}`
         },
         URL: isIntercom ? `${configFile.Intercom.Create_URL}/` : `${configFile.Knowledge_Owl.Get_URL}`,
-        ID: isIntercom? `${article.external_id}`:`${article.external_id}.json`,
+        ID: isIntercom ? `${article.external_id}` : `${article.external_id}.json`,
     });
     // const data = await reply.json();
     // LogInfo(JSON.stringify(data, null, 2) + '\n', 'blue');
@@ -218,7 +240,7 @@ async function Create_An_Article(article) {
     });
     // const data = await reply.json();
     // LogInfo(JSON.stringify(data, null, 2) + '\n', 'blue');
-    await new Promise(resolve => setTimeout(resolve, 1000)); 
+    await new Promise(resolve => setTimeout(resolve, 1000));
 }
 async function GetSnippets() {
     try {
@@ -256,7 +278,7 @@ function ReplaceSnippets(snippetData) {
                 // Perform the replacement
                 source_Articles[sourceIndex].current_version.en.text = source_Articles[sourceIndex].current_version.en.text.replace(regex, snippetData[index].current_version.en);
             }
-            new Promise(resolve => setTimeout(resolve, 5)); 
+            new Promise(resolve => setTimeout(resolve, 5));
         }
     }
 }
@@ -276,12 +298,12 @@ function ReplaceArticleLinks() {
                             .replaceAll(`href=\"https://eahelp.eventsair.com/home${source_Articles[b][_articleLink]}`, dest_Articles[intArticle][_articleLink]);
                         source_Articles[sourceIndex][_articleBody] = newBody;
                     }
-                    new Promise(resolve => setTimeout(resolve, 5)); 
+                    new Promise(resolve => setTimeout(resolve, 5));
                 }
             }
-            new Promise(resolve => setTimeout(resolve, 5)); 
+            new Promise(resolve => setTimeout(resolve, 5));
         }
-        new Promise(resolve => setTimeout(resolve, 1)); 
+        new Promise(resolve => setTimeout(resolve, 1));
     }
 }
 async function TestAPI() {
