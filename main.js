@@ -22,10 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const retries = 3;
 
-  try {
-    setInterval(FetchLogs, 200);
-    setInterval(scrollToBottom, 50);
-  } catch (error) { }
+  // try {
+  //   setInterval(FetchLogs, 200);
+  //   setInterval(scrollToBottom, 50);
+  // } catch (error) { }
 
   async function FetchLogs() {
     console.debug("Looking for event replies");
