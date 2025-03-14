@@ -22,10 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const retries = 3;
 
-  // try {
-  //   setInterval(FetchLogs, 200);
-  //   setInterval(scrollToBottom, 50);
-  // } catch (error) { }
+  try {
+    setInterval(FetchLogs, 200);
+    setInterval(scrollToBottom, 50);
+  } catch (error) { }
 
   async function FetchLogs() {
     console.debug("Looking for event replies");
@@ -50,92 +50,79 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         break;
       }
-      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
 
   //update and create articles
   update_create.addEventListener("click", () => {
     DisableButtons(true);
-    for (let i = 0; i < retries;) {
-      try {
-        fetch("/update&Create", { method: "POST" })
-          .then((response) => {
-            i = retries;
-            return response.text();
-          })
-          .then((resp) => {
-            return new Promise((resolve) => setTimeout(resolve, 5000));
-          })
-          .catch((error) =>
-            console.error("Error updating and creating articles:", error)
-          )
-          .finally(() => {
-            DisableButtons(false);
-          })
-        break;
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.error('Fetch aborted, retrying...', i + 1);
-          continue;
-        }
-        throw error; // If not an AbortError, break the loop
+    try {
+      fetch("/update&Create", { method: "POST" })
+        .then((response) => {
+          i = retries;
+          return response.text();
+        })
+        .then((resp) => {
+          return new Promise((resolve) => setTimeout(resolve, 5000));
+        })
+        .catch((error) =>
+          console.error("Error updating and creating articles:", error)
+        )
+        .finally(() => {
+          DisableButtons(false);
+        })
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.error('Fetch aborted, retrying...', i + 1);
       }
+      throw error; // If not an AbortError, break the loop
     }
   });
   //only udpate articles
   update.addEventListener("click", async () => {
     DisableButtons(true);
-    for (let i = 0; i < retries;) {
-      try {
-        fetch("/updateOnly", { method: "POST" })
-          .then((response) => {
-            i = retries;
-            return response.text();
-          })
-          .then((resp) => {
-            console.log(resp);
-            //return new Promise((resolve) => setTimeout(resolve, 3000));
-          })
-          .finally(() => {
-            DisableButtons(false);
-          })
-          .catch((error) => console.error("Error updating articles:", error))
-        break;
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.error('Fetch aborted, retrying...', i + 1);
-          continue;
-        }
-        throw error; // If not an AbortError, break the loop
+    try {
+      fetch("/updateOnly", { method: "POST" })
+        .then((response) => {
+          return response.text();
+        })
+        .then((resp) => {
+          console.log(resp);
+          //return new Promise((resolve) => setTimeout(resolve, 3000));
+        })
+        .finally(() => {
+          DisableButtons(false);
+        })
+        .catch((error) => console.error("Error updating articles:", error))
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.error('Fetch aborted, retrying...', i + 1);
       }
+      throw error; // If not an AbortError, break the loop
     }
+
   });
   //only create articles
   create.addEventListener("click", () => {
     DisableButtons(true);
-    for (let i = 0; i < retries;) {
-      try {
-        fetch("/createOnly", { method: "POST" })
-          .then((response) => {
-            i = retries;
-            return response.text();
-          })
-          .then((resp) => {
-            return new Promise((resolve) => setTimeout(resolve, 3000));
-          })
-          .catch((error) => console.error("Error creating articles:", error))
-          .finally(() => {
-            DisableButtons(false);
-          });
-        break;
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.error('Fetch aborted, retrying...', i + 1);
-          continue;
-        }
-        throw error; // If not an AbortError, break the loop
+    try {
+      fetch("/createOnly", { method: "POST" })
+        .then((response) => {
+          i = retries;
+          return response.text();
+        })
+        .then((resp) => {
+          return new Promise((resolve) => setTimeout(resolve, 3000));
+        })
+        .catch((error) => console.error("Error creating articles:", error))
+        .finally(() => {
+          DisableButtons(false);
+        });
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.error('Fetch aborted, retrying...', i + 1);
       }
+      throw error; // If not an AbortError, break the loop
     }
   }
   );
@@ -148,31 +135,27 @@ document.addEventListener("DOMContentLoaded", () => {
       return new Promise((resolve) => setTimeout(resolve, 3000));
     } else {
       DisableButtons(true);
-      for (let i = 0; i < retries;) {
-        try {
-          fetch(`/createSpecific/${inputValue}`, { method: "POST" })
-            .then((response) => {
-              i = retries;
+      try {
+        fetch(`/createSpecific/${inputValue}`, { method: "POST" })
+          .then((response) => {
+            i = retries;
 
-              return response.text();
-            })
-            .then((resp) => {
-              console.log(resp);
-              return new Promise((resolve) => setTimeout(resolve, 3000));
-            })
-            .catch((error) =>
-              console.error("Error trying to update article", error)
-            ).finally(() => {
-              DisableButtons(false);
-            });
-          break;
-        } catch (error) {
-          if (error.name === 'AbortError') {
-            console.error('Fetch aborted, retrying...', i + 1);
-            continue;
-          }
-          throw error; // If not an AbortError, break the loop
+            return response.text();
+          })
+          .then((resp) => {
+            console.log(resp);
+            return new Promise((resolve) => setTimeout(resolve, 3000));
+          })
+          .catch((error) =>
+            console.error("Error trying to update article", error)
+          ).finally(() => {
+            DisableButtons(false);
+          });
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.error('Fetch aborted, retrying...', i + 1);
         }
+        throw error; // If not an AbortError, break the loop
       }
     }
   });
@@ -185,33 +168,29 @@ document.addEventListener("DOMContentLoaded", () => {
       return new Promise((resolve) => setTimeout(resolve, 3000));
     } else {
       DisableButtons(true);
-      for (let i = 0; i < retries;) {
-        try {
-          fetch(`/updateSpecific/${inputValue}`, { method: "POST" })
-            .then((response) => {
-              i = retries;
-              return response.text();
-            })
-            .then((resp) => {
-              console.log(resp);
-              return new Promise((resolve) => setTimeout(resolve, 3000));
-            })
-            .catch((error) =>
-              console.error("Error trying to update article", error)
-            )
-            .finally(() => {
-              DisableButtons(false);
-            });
-          break;
-        } catch (error) {
-          if (error.name === 'AbortError') {
-            console.error('Fetch aborted, retrying...', i + 1);
-            continue;
-          }
-          throw error; // If not an AbortError, break the loop
+      try {
+        fetch(`/updateSpecific/${inputValue}`, { method: "POST" })
+          .then((response) => {
+            i = retries;
+            return response.text();
+          })
+          .then((resp) => {
+            console.log(resp);
+            return new Promise((resolve) => setTimeout(resolve, 3000));
+          })
+          .catch((error) =>
+            console.error("Error trying to update article", error)
+          )
+          .finally(() => {
+            DisableButtons(false);
+          });
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.error('Fetch aborted, retrying...', i + 1);
         }
-
+        throw error; // If not an AbortError, break the loop
       }
+
     }
   });
   //remove article from intercom
@@ -235,8 +214,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
   function DisableButtons(state) {
-    console.log(state);
-    //console.log('something happened');
     update_create.disabled = state;
     update.disabled = state;
     create.disabled = state;
