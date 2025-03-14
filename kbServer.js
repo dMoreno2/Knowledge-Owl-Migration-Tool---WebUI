@@ -122,7 +122,7 @@ function getLocalIP() {
   for (let name in interfaces) {
     for (let iface of interfaces[name]) {
       // Skip over non-IPv4 and internal (i.e., 127.0.0.1) addresses
-      if (iface.family === 'IPv4' && !iface.internal) {
+      if (iface.family === 'IPv4' && !iface.internal&&name!=='NordLynx') {
         return iface.address;
       }
     }
@@ -167,8 +167,8 @@ function Add_To_Server_Queue(val) {
   log_to_server_queue.push(val);
 }
 
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-});
+// process.on("unhandledRejection", (reason, promise) => {
+//   console.error("Unhandled Rejection at:", promise, "reason:", reason);
+// });
 
 StartServer();
