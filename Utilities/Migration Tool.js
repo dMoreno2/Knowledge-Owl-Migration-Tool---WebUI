@@ -1,14 +1,10 @@
 module.exports = { Program_Switch };
 const { LogInfo } = require('./Logger.js');
-const { CallAPI } = require('./API Caller.js');
 const { Get_MultiPage_Request } = require('./API Caller.js');
 
 const fs = require('fs');
-const { title } = require('process');
-const { reverse } = require('dns');
 
 var configFile;
-var maxPages = 1;
 
 var source_Articles = [];
 var dest_Articles = [];
@@ -80,23 +76,18 @@ async function Update_Articles_Only(id) {
     if (!reverseProgam) {
         //for KO to Intercom
         source_Articles = await Get_KO_Articles(id);
-        await new Promise(resolve => setTimeout(resolve, 50));
         dest_Articles = await Get_Int_Articles();
-        await new Promise(resolve => setTimeout(resolve, 50));
         await ReplaceSnippets(await GetSnippets());
     }
 
     if (reverseProgam) {
         //for Intercom to KO
         dest_Articles = await Get_KO_Articles();
-        await new Promise(resolve => setTimeout(resolve, 50));
         source_Articles = await Get_Int_Articles(id);
-        await new Promise(resolve => setTimeout(resolve, 50));
     }
 
     //ProcessArticles(create, update)
     await ProcessArticles(false, true);
-    await new Promise(resolve => setTimeout(resolve, 50));
 
     LogInfo("Final:Processing Complete");
 }
@@ -218,9 +209,8 @@ async function Update_An_Article(article) {
     });
     // const data = await reply.json();
     // LogInfo(JSON.stringify(data, null, 2) + '\n', 'blue');
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
 }
-
 
 //still needs ot have alternatives set for creating article accross into KO
 async function Create_An_Article(article) {
@@ -306,53 +296,3 @@ function ReplaceArticleLinks() {
         new Promise(resolve => setTimeout(resolve, 1));
     }
 }
-async function TestAPI() {
-    source_Articles = await Get_MultiPage_Request({
-        headerType: "Knowledge_Owl",
-        queryMethod: "GET",
-        additional_Headers: {
-            'Authorization': `Basic ${btoa(`${configFile.Knowledge_Owl.API_Key}:${configFile.Knowledge_Owl.Password}`)}`
-        },
-        URL: `${configFile.Knowledge_Owl.Get_URL}`,
-        ID: "6477c45857fb5905ec22a946",
-        additional_Params: {
-            project_id: `${configFile.Knowledge_Owl.Project_ID}`
-        }
-    });
-    source_Articles = [];
-    source_Articles = await Get_MultiPage_Request({
-        headerType: "Knowledge_Owl",
-        queryMethod: "GET",
-        additional_Headers: {
-            'Authorization': `Basic ${btoa(`${configFile.Knowledge_Owl.API_Key}:${configFile.Knowledge_Owl.Password}`)}`
-        },
-        URL: `${configFile.Knowledge_Owl.Search_URL}`,
-        ID: "",
-        additional_Params: {
-            project_id: `${configFile.Knowledge_Owl.Project_ID}`,
-            status: "published"
-        }
-    })
-
-
-    dest_Articles = await Get_MultiPage_Request({
-        headerType: "Intercom",
-        queryMethod: "GET",
-        additional_Headers: {
-            'Authorization': `Bearer ${configFile.Intercom.Bearer_Token}`,
-        },
-        URL: `${configFile.Intercom.Create_URL}`,
-    });
-    dest_Articles = [];
-    source_Articles = await Get_MultiPage_Request({
-        headerType: "Intercom",
-        queryMethod: "GET",
-        additonal_Headers: {
-            'Authorization': `Bearer ${configFile.Intercom.Bearer_Token}`,
-        },
-        URL: `${configFile.Intercom.Create_URL}`,
-        ID: "/9812221",
-    });
-}
-
-//TestAPI();
