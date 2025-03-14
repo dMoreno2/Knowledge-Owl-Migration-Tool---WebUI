@@ -19,13 +19,14 @@ let green = '\x1b[32m';
 let yellow = '\x1b[33m';
 let blue = '\x1b[34m';
 
-async function LogInfo(logContents, colours = '\x1b[0m') {
+function LogInfo(logContents, colours = '\x1b[0m') {
     const log = JSON.stringify({ Time: GetDateTime(), data:logContents }, null, 2);
-    try {
-        await fs.promises.appendFile(logFilePath, `${log},\n`);
-    } catch (err) {
-        console.error("Error writing log file:", err);
-    }    console.log(colours, log);
+    fs.appendFile(logFilePath, `${log},\n`, (err) => {
+        if (err) {
+            console.error("Error writing log file:", err);
+        }
+    });
+    console.log(colours, log);
     Add_To_Server_Queue(log);
 }
 function GetDateTime() {
