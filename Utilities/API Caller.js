@@ -1,9 +1,6 @@
 module.exports = { CallAPI, Get_MultiPage_Request };
 const { LogInfo } = require('./Logger.js');
 
-//timeout for api calls
-const controller = new AbortController();
-const timeoutId = setTimeout(() => controller.abort(), 10000);
 const fs = require('fs');
 
 // function requestOptions
@@ -28,7 +25,7 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
                 ...additionalHeaderValues,
             },
             body: bodyValues ? JSON.stringify(bodyValues) : null,
-            signal: controller.signal,
+            //signal: controller.signal,
         },
         Intercom: {
             method: requestMethod,
@@ -39,7 +36,7 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
                 ...additionalHeaderValues,
             },
             body: bodyValues ? JSON.stringify(bodyValues) : null,
-            signal: controller.signal,
+            //signal: controller.signal,
         },
         TEST: {
             method: requestMethod,
@@ -48,48 +45,43 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
                 'Content-Type': 'application/json',
             },
             body: null,
-            signal: controller.signal,
+            //signal: controller.signal,
         },
     };
     return requestOptions;
 }
 
-function CallAPI(headerType, requestMethod, bodyValues = null, additional_header_values = null, apiUrl, apiArgs, pageCount) {
-    return new Promise((resolve, reject) => {
-
-        apiUrl += "?";
-        if (apiArgs) {
-            Object.entries(apiArgs).forEach(([key, value]) => {
-                apiUrl += `${key}=${value}&`;
-            });
-        }
-        apiUrl = pageCount ? apiUrl + pageCount : apiUrl.slice(0, -1);
-
-        for (let i = 0; i < 3;) {
-            try {
-                const reqOptions = CreateHeader(requestMethod, bodyValues, additional_header_values);
-                fetch(apiUrl, reqOptions[headerType], { signal: controller.signal })
-                    .then(response => response.json())
-                    .then(data => {
-                        clearTimeout(timeoutId); // Only called on success
-                        resolve(data);
-                        //LogInfo(`Response: ${data}`);
-                    });
-                break;
-                // .catch(error => {
-                //     console.error('There has been a problem with your fetch operation:', error);
-                //     reject(error);
-                // });
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    console.error('Fetch aborted, retrying...', i + 1);
-                    continue;
-                }
-                throw error; // If not an AbortError, break the loop
+async function CallAPI(headerType, requestMethod, bodyValues = null, additional_header_values = null, apiUrl, apiArgs, pageCount) {
+    apiUrl += "?";
+    if (apiArgs) {
+        Object.entries(apiArgs).forEach(([key, value]) => {
+            apiUrl += `${key}=${value}&`;
+        });
+    }
+    apiUrl = pageCount ? apiUrl + pageCount : apiUrl.slice(0, -1);
+    for (let i = 0; i < 3;) {
+        //timeout for api calls
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        try {
+            const reqOptions = CreateHeader(requestMethod, bodyValues, additional_header_values);
+            const response = await fetch(apiUrl,{ ...reqOptions[headerType], signal: controller.signal })
+            clearTimeout(timeoutId); // Only called on success
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            clearTimeout(timeoutId); // Ensure timeout is cleared
+            if (error.name === 'AbortError') {
+                console.warn(`Fetch aborted due to timeout (attempt ${i + 1}/3)`);
+                continue; // Retry
+            } 
+            console.error("Fetch error:", error);
         }
-        //throw new Error('Fetch failed after retries');
-    });
+    }
+    throw new Error("API call failed after 3 attempts.");
 }
 
 async function Get_MultiPage_Request(Call_Object,) {
