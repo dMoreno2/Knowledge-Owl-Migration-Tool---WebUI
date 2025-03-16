@@ -27,31 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(scrollToBottom, 50);
   } catch (error) { }
 
-  async function FetchLogs() {
-    console.debug("Looking for event replies");
-
-    for (let i = 0; i < retries; i++) {
-      try {
-        const response = await fetch("/events", { method: "POST" });
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const resp = await response.text();
-        if (resp) {
-          output.innerHTML += ` ${resp}`;
-        }
-        return; // Exit loop on success
-      } catch (error) {
-        console.error("Fetch error:", error);
-
-        if (error.name === "AbortError") {
-          console.warn(`Fetch aborted, retrying... (${i + 1}/${retries})`);
-          continue; // Retry only on abort errors
-        }
-        break;
-      }
-    }
-  }
+  //output.innerHTML += ` ${resp}`;
 
   //update and create articles
   update_create.addEventListener("click", () => {

@@ -72,27 +72,22 @@ async function Update_And_Create_Articles() {
     LogInfo("Final:Processing Complete");
 }
 async function Update_Articles_Only(id) {
-
     if (!reverseProgam) {
         //for KO to Intercom
         source_Articles = await Get_KO_Articles(id);
         dest_Articles = await Get_Int_Articles();
         await ReplaceSnippets(await GetSnippets());
     }
-
     if (reverseProgam) {
         //for Intercom to KO
         dest_Articles = await Get_KO_Articles();
         source_Articles = await Get_Int_Articles(id);
     }
-
     //ProcessArticles(create, update)
     await ProcessArticles(false, true);
-
     LogInfo("Final:Processing Complete");
 }
 async function Create_Articles_Only(id) {
-
     if (!reverseProgam) {
         //for KO to Intercom
         source_Articles = await Get_KO_Articles(id);
@@ -118,7 +113,7 @@ async function Create_Articles_Only(id) {
 }
 async function DeleteArticle(id) {
     //WHY?
-    //This function shouldn't exist should it? Maybe theres a fustification but I don't know it
+    //This function shouldn't exist should it? Maybe theres a justification but I don't know it
     //So I won't build it
 }
 async function Get_KO_Articles(id = '') {

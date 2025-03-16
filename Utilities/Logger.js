@@ -35,12 +35,9 @@ function GetDateTime() {
     const now = `${currentDate.getDate()}-${currentDate.getMonth() + 1}-${currentDate.getFullYear()}--${currentDate.getHours()}-${currentDate.getMinutes()}-${currentDate.getSeconds()}`;
     return now
 }
-
 function TestLog(){
     LogInfo("This is a red message", red);
     LogInfo("This is a green message", green);
     LogInfo("This is a yellow message", yellow);
     LogInfo("This is a blue message", blue);
 }
-
-//TestLog();

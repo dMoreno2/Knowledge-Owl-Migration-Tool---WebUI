@@ -1,9 +1,7 @@
 module.exports = { CallAPI, Get_MultiPage_Request };
 const { LogInfo } = require('./Logger.js');
-
 const fs = require('fs');
 
-// function requestOptions
 try {
     const data = fs.readFileSync("config.json", 'utf8');
     configFile = JSON.parse(data);
@@ -15,7 +13,6 @@ try {
 } catch (error) {
     LogInfo(error);
 }
-
 function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues = null) {
     const requestOptions = {
         Knowledge_Owl: {
@@ -50,7 +47,6 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
     };
     return requestOptions;
 }
-
 async function CallAPI(headerType, requestMethod, bodyValues = null, additional_header_values = null, apiUrl, apiArgs, pageCount) {
     apiUrl += "?";
     if (apiArgs) {
@@ -83,7 +79,6 @@ async function CallAPI(headerType, requestMethod, bodyValues = null, additional_
     }
     throw new Error("API call failed after 3 attempts.");
 }
-
 async function Get_MultiPage_Request(Call_Object,) {
     maxPages = 1;
     var content = [];
@@ -100,8 +95,7 @@ async function Get_MultiPage_Request(Call_Object,) {
             maxPages = resp.page_stats?.total_pages ?? resp.pages?.total_pages;
             for (let index = 0; index < resp.data.length; index++) {
                 content.push(resp.data[index]);
-                //LogInfo(`"${Call_Object.headerType}": "${resp.data[index].current_version.en.title}"`) ?? LogInfo(`"${Call_Object.headerType}": "${resp.data.current_version.en.title}"`);
-                ;
+                LogInfo(`"${Call_Object.headerType}": "${resp.data[index].current_version.en.title}"`) ?? LogInfo(`"${Call_Object.headerType}": "${resp.data.current_version.en.title}"`);
             }
         } else {
             if (Call_Object.headerType !== 'Knowledge_Owl' && Call_Object.ID !== null) {
@@ -116,10 +110,8 @@ async function Get_MultiPage_Request(Call_Object,) {
     }
     return content;
 }
-
 async function Test_API_Caller() {
     var something = await CallAPI('TEST', 'GET', null, null, 'https://httpbin.org/json');
     console.log(JSON.stringify(something, null, 2));
 }
-
 //Test_API_Caller();

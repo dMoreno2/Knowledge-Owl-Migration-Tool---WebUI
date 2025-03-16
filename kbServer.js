@@ -15,18 +15,12 @@ const log_to_server_queue = [];
 function StartServer() {
   const server = http.createServer((req, res) => {
     const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
-    //LogInfo(`Requested URL: ${req.url} at: ${clientIP}`);
-    //if (req.url !== "/events") {
-      LogInfo(`Requested URL: ${req.url} at: ${clientIP}`);
-    //}
-
+    LogInfo(`Requested URL: ${req.url} at: ${clientIP}`);
     if (req.method === 'GET') {
       const filePath = `.${req.url === '/' ? '/index.html' : req.url}`;
       const contentType = getContentType(filePath);
       serveStaticFile(filePath, contentType, res);
     }
-
     else if (req.method === 'POST') {
       if (req.url === '/update&Create') {
         LogInfo("Updating and Creating new articles");
@@ -81,17 +75,8 @@ function StartServer() {
           }
         });
       } else if (req.url.includes("/removeSpecific")) {
-        
-      // } else if (req.url === "/events") {
-      //   if (log_to_server_queue.length > 0) {
-      //     res.writeHead(200, { "Content-Type": "text/plain" });
-      //     res.write(log_to_server_queue + '\n');
-      //     log_to_server_queue.shift();
-      //     res.end();
-      //   }
-      //   else {
-      //     res.end();
-      //   }
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('NO');
       } else {
         // Invalid POST request
         res.writeHead(404, { 'Content-Type': 'text/plain' });
@@ -122,7 +107,7 @@ function getLocalIP() {
   for (let name in interfaces) {
     for (let iface of interfaces[name]) {
       // Skip over non-IPv4 and internal (i.e., 127.0.0.1) addresses
-      if (iface.family === 'IPv4' && !iface.internal&&name!=='NordLynx') {
+      if (iface.family === 'IPv4' && !iface.internal && name !== 'NordLynx') {
         return iface.address;
       }
     }
@@ -166,9 +151,5 @@ function serveStaticFile(filePath, contentType, res) {
 function Add_To_Server_Queue(val) {
   log_to_server_queue.push(val);
 }
-
-// process.on("unhandledRejection", (reason, promise) => {
-//   console.error("Unhandled Rejection at:", promise, "reason:", reason);
-// });
 
 StartServer();
