@@ -95,7 +95,6 @@ async function Get_MultiPage_Request(Call_Object,) {
             maxPages = resp.page_stats?.total_pages ?? resp.pages?.total_pages;
             for (let index = 0; index < resp.data.length; index++) {
                 content.push(resp.data[index]);
-                LogInfo(`"${Call_Object.headerType}": "${resp.data[index].current_version.en.title}"`) ?? LogInfo(`"${Call_Object.headerType}": "${resp.data.current_version.en.title}"`);
             }
         } else {
             if (Call_Object.headerType !== 'Knowledge_Owl' && Call_Object.ID !== null) {
