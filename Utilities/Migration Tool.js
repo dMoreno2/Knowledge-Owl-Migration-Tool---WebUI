@@ -96,7 +96,6 @@ async function Create_Articles_Only(id) {
         await new Promise(resolve => setTimeout(resolve, 1000));
         await ReplaceSnippets(await GetSnippets());
     }
-
     if (reverseProgam) {
         //for Intercom to KO
         dest_Articles = await Get_KO_Articles();
@@ -184,7 +183,6 @@ async function Update_An_Article(article) {
 
     // Conditionally set the body, current_version, and project_id based on the headerType
     const additionalBody = {
-        //body: isIntercom ? cleanedBody:undefined,
         name: isIntercom ? undefined : article.current_version?.en?.title || article.title,
         title: isIntercom ? isIntercom : undefined,
         current_version: isIntercom ? undefined : cleanedBody,
@@ -206,21 +204,27 @@ async function Update_An_Article(article) {
     // LogInfo(JSON.stringify(data, null, 2) + '\n', 'blue');
     await new Promise(resolve => setTimeout(resolve, 500));
 }
-
-//still needs ot have alternatives set for creating article accross into KO
 async function Create_An_Article(article) {
+    const isIntercom = article.current_version?.en?.title;
+    const cleanedBody = `${(article.current_version?.en?.text || article.body || '').replace(/\n/g, '')}`;
     await Get_MultiPage_Request({
-        headerType: "Intercom",
+        headerType: isIntercom ? "Intercom" : "Knowledge_Owl",
         queryMethod: "POST",
         additional_Headers: {
-            'Authorization': `Bearer ${configFile.Intercom.Bearer_Token}`,
+            'Authorization': isIntercom ? `Bearer ${configFile.Intercom.Bearer_Token}` : `Basic ${btoa(`${configFile.Knowledge_Owl.API_Key}:${configFile.Knowledge_Owl.Password}`)}`
         },
-        URL: `${configFile.Intercom.Create_URL}`,
+        URL: isIntercom ? `${configFile.Intercom.Create_URL}` : `${configFile.Knowledge_Owl.Search_URL}.json`,
         additional_Body: {
-            author_id: 7491322,
-            title: article.current_version.en.title || article.title,
-            body: article.current_version.en.body || article.body,
-            state: 'draft'
+            author_id: isIntercom ? 7491322 : undefined,
+            name: isIntercom ? undefined : article.current_version?.en?.title || article.title,
+            title: isIntercom ? isIntercom : undefined,
+            current_version: isIntercom ? undefined : cleanedBody,
+            body: isIntercom ? article.current_version?.en?.text : undefined,
+            project_id: isIntercom ? undefined : `${configFile.Knowledge_Owl.Project_ID}`,
+            state: isIntercom ? 'draft' : undefined,
+            status: isIntercom ? undefined : 'draft',
+            visibility: isIntercom ? undefined : 'public',
+            url_hash: isIntercom ? undefined : isIntercom,
         }
     });
     // const data = await reply.json();
@@ -267,6 +271,7 @@ function ReplaceSnippets(snippetData) {
         }
     }
 }
+//Doesn't really work but the logic behind it is there for someone with a more quiet mind to work on 
 function ReplaceArticleLinks() {
     for (let sourceIndex = 0; sourceIndex < source_Articles.length; sourceIndex++) { // for each article
         for (let b = 0; b < source_Articles.length; b++) {  // for each link on each article
