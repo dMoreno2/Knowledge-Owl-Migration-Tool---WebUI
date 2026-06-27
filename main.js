@@ -3,214 +3,138 @@ document.addEventListener("DOMContentLoaded", () => {
   const update = document.getElementById("update");
   const create = document.getElementById("create");
   const exportIntercom = document.getElementById("exportIntercom");
-
-  //update specific article
   const update_id = document.getElementById("updateSpecific_id");
   const updateSpecific = document.getElementById("updateSpecific");
-
-  //delete specific article
   const remove_article_id = document.getElementById("remove_article_id");
   const deleteArticle = document.getElementById("delete");
-
-  //create specific article
   const create_article_id = document.getElementById("createSpecific_id");
   const createSpecific = document.getElementById("createSpecific");
-
   const output = document.getElementById("output");
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000);
+  setInterval(FetchLogs, 200);
+  setInterval(scrollToBottom, 50);
 
-  const retries = 3;
-
-  try {
-    setInterval(FetchLogs, 200);
-    setInterval(scrollToBottom, 50);
-  } catch (error) { }
-
-  //output.innerHTML += ` ${resp}`;
-
-  //update and create articles
-  update_create.addEventListener("click", () => {
-    DisableButtons(true);
-    try {
-      fetch("/update&Create", { method: "POST" })
-        .then((response) => {
-          i = retries;
-          return response.text();
-        })
-        .then((resp) => {
-          return new Promise((resolve) => setTimeout(resolve, 5000));
-        })
-        .catch((error) =>
-          console.error("Error updating and creating articles:", error)
-        )
-        .finally(() => {
-          DisableButtons(false);
-        })
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.error('Fetch aborted, retrying...', i + 1);
-      }
-      throw error; // If not an AbortError, break the loop
+  // Redirect to login on session expiry — called after every response
+  function checkAuth(response) {
+    if (response.status === 401) {
+      window.location.href = '/login';
+      return false;
     }
-  });
-  //only udpate articles
-  update.addEventListener("click", async () => {
-    DisableButtons(true);
-    try {
-      fetch("/updateOnly", { method: "POST" })
-        .then((response) => {
-          return response.text();
-        })
-        .then((resp) => {
-          console.log(resp);
-          //return new Promise((resolve) => setTimeout(resolve, 3000));
-        })
-        .finally(() => {
-          DisableButtons(false);
-        })
-        .catch((error) => console.error("Error updating articles:", error))
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.error('Fetch aborted, retrying...', i + 1);
-      }
-      throw error; // If not an AbortError, break the loop
-    }
+    return true;
+  }
 
-  });
-  //only create articles
-  create.addEventListener("click", () => {
-    DisableButtons(true);
+  async function FetchLogs() {
     try {
-      fetch("/createOnly", { method: "POST" })
-        .then((response) => {
-          i = retries;
-          return response.text();
-        })
-        .then((resp) => {
-          return new Promise((resolve) => setTimeout(resolve, 3000));
-        })
-        .catch((error) => console.error("Error creating articles:", error))
-        .finally(() => {
-          DisableButtons(false);
-        });
+      const response = await fetch("/events", { method: "POST" });
+      if (!checkAuth(response)) return;
+      const resp = await response.text();
+      if (resp) output.innerHTML += ` ${resp}`;
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.error('Fetch aborted, retrying...', i + 1);
-      }
-      throw error; // If not an AbortError, break the loop
+      console.debug("FetchLogs error:", error);
     }
   }
-  );
-  //update only specified articles
+
+  update_create.addEventListener("click", () => {
+    DisableButtons(true);
+    fetch("/update&Create", { method: "POST" })
+      .then((response) => {
+        if (!checkAuth(response)) return;
+        return response.text();
+      })
+      .catch((error) => console.error("Error updating and creating articles:", error))
+      .finally(() => DisableButtons(false));
+  });
+
+  update.addEventListener("click", () => {
+    DisableButtons(true);
+    fetch("/updateOnly", { method: "POST" })
+      .then((response) => {
+        if (!checkAuth(response)) return;
+        return response.text();
+      })
+      .catch((error) => console.error("Error updating articles:", error))
+      .finally(() => DisableButtons(false));
+  });
+
+  create.addEventListener("click", () => {
+    DisableButtons(true);
+    fetch("/createOnly", { method: "POST" })
+      .then((response) => {
+        if (!checkAuth(response)) return;
+        return response.text();
+      })
+      .catch((error) => console.error("Error creating articles:", error))
+      .finally(() => DisableButtons(false));
+  });
+
   createSpecific.addEventListener("click", () => {
     const inputValue = create_article_id.value;
     if (!inputValue) {
-      alert(`PLEASE ENTER VALUE `);
-      output.textContent = "";
-      return new Promise((resolve) => setTimeout(resolve, 3000));
-    } else {
-      DisableButtons(true);
-      try {
-        fetch(`/createSpecific/${inputValue}`, { method: "POST" })
-          .then((response) => {
-            i = retries;
-
-            return response.text();
-          })
-          .then((resp) => {
-            console.log(resp);
-            return new Promise((resolve) => setTimeout(resolve, 3000));
-          })
-          .catch((error) =>
-            console.error("Error trying to update article", error)
-          ).finally(() => {
-            DisableButtons(false);
-          });
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.error('Fetch aborted, retrying...', i + 1);
-        }
-        throw error; // If not an AbortError, break the loop
-      }
+      alert("PLEASE ENTER VALUE");
+      return;
     }
+    DisableButtons(true);
+    fetch(`/createSpecific/${inputValue}`, { method: "POST" })
+      .then((response) => {
+        if (!checkAuth(response)) return;
+        return response.text();
+      })
+      .catch((error) => console.error("Error creating article:", error))
+      .finally(() => DisableButtons(false));
   });
-  //update only specified articles
+
   updateSpecific.addEventListener("click", () => {
     const inputValue = update_id.value;
     if (!inputValue) {
-      alert(`PLEASE ENTER VALUE `);
-      output.textContent = "";
-      return new Promise((resolve) => setTimeout(resolve, 3000));
-    } else {
-      DisableButtons(true);
-      try {
-        fetch(`/updateSpecific/${inputValue}`, { method: "POST" })
-          .then((response) => {
-            i = retries;
-            return response.text();
-          })
-          .then((resp) => {
-            console.log(resp);
-            return new Promise((resolve) => setTimeout(resolve, 3000));
-          })
-          .catch((error) =>
-            console.error("Error trying to update article", error)
-          )
-          .finally(() => {
-            DisableButtons(false);
-          });
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          console.error('Fetch aborted, retrying...', i + 1);
-        }
-        throw error; // If not an AbortError, break the loop
-      }
-
+      alert("PLEASE ENTER VALUE");
+      return;
     }
+    DisableButtons(true);
+    fetch(`/updateSpecific/${inputValue}`, { method: "POST" })
+      .then((response) => {
+        if (!checkAuth(response)) return;
+        return response.text();
+      })
+      .catch((error) => console.error("Error updating article:", error))
+      .finally(() => DisableButtons(false));
   });
+
   exportIntercom.addEventListener("click", () => {
     DisableButtons(true);
-    fetch('/exportIntercom')
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        return res.blob();
+    fetch("/exportIntercom")
+      .then((response) => {
+        if (!checkAuth(response)) return;
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        return response.blob();
       })
-      .then(blob => {
+      .then((blob) => {
+        if (!blob) return;
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = 'intercom-articles.json';
+        a.download = "intercom-articles.json";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       })
-      .catch(err => console.error('Export error:', err))
+      .catch((error) => console.error("Export error:", error))
       .finally(() => DisableButtons(false));
   });
 
-  //remove article from intercom
   deleteArticle.addEventListener("click", () => {
     const inputValue = remove_article_id.value;
     if (!inputValue) {
-      alert(`PLEASE ENTER VALUE `);
-      return new Promise((resolve) => setTimeout(resolve, 3000));
-    } else {
-      DisableButtons(true);
-      new Promise((resolve) => setTimeout(resolve, 2000));
-      alert(`NO `);
-      new Promise((resolve) => setTimeout(resolve, 2000));
-      DisableButtons(false);
+      alert("PLEASE ENTER VALUE");
+      return;
     }
+    alert("Delete not implemented.");
   });
-  async function scrollToBottom() {
-    if (output) {
-      // Check if the user is already scrolled up
-      output.scrollToBottom = output.scrollHeight
-    }
+
+  function scrollToBottom() {
+    if (output) output.scrollTop = output.scrollHeight;
   }
+
   function DisableButtons(state) {
     update_create.disabled = state;
     update.disabled = state;

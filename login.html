@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login — Knowledge Owl Migration Tool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(51, 51, 51);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card {
+            background: rgb(3, 15, 47);
+            border-radius: 15px;
+            padding: 40px;
+            width: 380px;
+        }
+        h2 { color: white; margin-bottom: 24px; font-size: 1.2em; }
+        label { color: white; font-size: 0.9em; display: block; margin-bottom: 6px; }
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgb(79, 79, 79);
+            background: rgb(32, 37, 67);
+            color: white;
+            margin-bottom: 18px;
+            font-size: 0.95em;
+        }
+        button {
+            width: 100%;
+            background-color: orange;
+            color: black;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover { background-color: #e69500; }
+        .forgot { display: block; margin-top: 14px; color: #aaa; font-size: 0.85em; text-align: center; text-decoration: none; }
+        .forgot:hover { color: white; }
+        .error { color: #ff6b6b; font-size: 0.85em; margin-bottom: 14px; }
+        .success { color: #6bff8e; font-size: 0.85em; margin-bottom: 14px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Knowledge Owl Migration Tool</h2>
+        <div id="msg"></div>
+        <form method="POST" action="/login">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required autocomplete="email" />
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password" />
+            <button type="submit">Login</button>
+        </form>
+        <a class="forgot" href="/forgot-password">Forgot password?</a>
+    </div>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const msg = document.getElementById('msg');
+        if (params.get('error')) {
+            msg.innerHTML = '<p class="error">Invalid email or password.</p>';
+        } else if (params.get('reset')) {
+            msg.innerHTML = '<p class="success">Password reset successfully. Please log in.</p>';
+        }
+    </script>
+</body>
+</html>

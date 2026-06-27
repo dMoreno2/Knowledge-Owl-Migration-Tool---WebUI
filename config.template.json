@@ -12,5 +12,12 @@
         "Bearer_Token": "YOUR_BEARER_TOKEN_HERE",
         "Client_ID":"YOUR_CLIENT_ID_HERE",
         "Client_Secret":"YOUR_CLIENT_SECRET_HERE"
+    },
+    "Email": {
+        "host": "smtp.gmail.com",
+        "port": 587,
+        "user": "your@gmail.com",
+        "password": "YOUR_APP_PASSWORD_HERE",
+        "from": "No Reply"
     }
 }

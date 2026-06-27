@@ -1,0 +1,13 @@
+{
+  "name": "knowledge-owl-migration-tool",
+  "version": "1.0.0",
+  "description": "Knowledge Owl to Intercom migration tool",
+  "main": "kbServer.js",
+  "scripts": {
+    "start": "node kbServer.js",
+    "setup-user": "node setup-user.js"
+  },
+  "dependencies": {
+    "nodemailer": "^9.0.1"
+  }
+}
