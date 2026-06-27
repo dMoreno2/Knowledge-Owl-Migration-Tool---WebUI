@@ -1,9 +1,6 @@
 module.exports = { CallAPI, Get_MultiPage_Request };
 const { LogInfo } = require('./Logger.js');
 
-//timeout for api calls
-const controller = new AbortController();
-const timeoutId = setTimeout(() => controller.abort(), 10000);
 const fs = require('fs');
 
 // function requestOptions
@@ -27,7 +24,6 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
                 ...additionalHeaderValues,
             },
             body: bodyValues ? JSON.stringify(bodyValues) : null,
-            signal: controller.signal,
         },
         Intercom: {
             method: requestMethod,
@@ -38,7 +34,6 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
                 ...additionalHeaderValues,
             },
             body: bodyValues ? JSON.stringify(bodyValues) : null,
-            signal: controller.signal,
         },
         TEST: {
             method: requestMethod,
@@ -47,7 +42,6 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
                 'Content-Type': 'application/json',
             },
             body: null,
-            signal: controller.signal,
         },
     };
     return requestOptions;
@@ -55,6 +49,8 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
 
 function CallAPI(headerType, requestMethod, bodyValues = null, additional_header_values = null, apiUrl, apiArgs, pageCount) {
     return new Promise((resolve, reject) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
 
         apiUrl += "?";
         if (apiArgs) {
@@ -64,30 +60,19 @@ function CallAPI(headerType, requestMethod, bodyValues = null, additional_header
         }
         apiUrl = pageCount ? apiUrl + pageCount : apiUrl.slice(0, -1);
 
-        for (let i = 0; i < 3;) {
-            try {
-                const reqOptions = CreateHeader(requestMethod, bodyValues, additional_header_values);
-                fetch(apiUrl, reqOptions[headerType], { signal: controller.signal })
-                    .then(response => response.json())
-                    .then(data => {
-                        clearTimeout(timeoutId); // Only called on success
-                        resolve(data);
-                        LogInfo(`Response: ${data}`);
-                    });
-                break;
-                // .catch(error => {
-                //     console.error('There has been a problem with your fetch operation:', error);
-                //     reject(error);
-                // });
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    console.error('Fetch aborted, retrying...', i + 1);
-                    continue;
-                }
-                throw error; // If not an AbortError, break the loop
-            }
-        }
-        //throw new Error('Fetch failed after retries');
+        const reqOptions = CreateHeader(requestMethod, bodyValues, additional_header_values);
+        fetch(apiUrl, { ...reqOptions[headerType], signal: controller.signal })
+            .then(response => response.json())
+            .then(data => {
+                clearTimeout(timeoutId);
+                resolve(data);
+                LogInfo(`Response: ${data}`);
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+                LogInfo(`Fetch error: ${error}`, 'red');
+                reject(error);
+            });
     });
 }
 
