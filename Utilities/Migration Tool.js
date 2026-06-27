@@ -1,4 +1,4 @@
-module.exports = { Program_Switch };
+module.exports = { Program_Switch, Get_Int_Articles };
 const { LogInfo } = require('./Logger.js');
 const { Get_MultiPage_Request } = require('./API Caller.js');
 

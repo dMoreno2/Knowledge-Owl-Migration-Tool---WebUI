@@ -22,7 +22,6 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
                 ...additionalHeaderValues,
             },
             body: bodyValues ? JSON.stringify(bodyValues) : null,
-            //signal: controller.signal,
         },
         Intercom: {
             method: requestMethod,
@@ -33,7 +32,6 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
                 ...additionalHeaderValues,
             },
             body: bodyValues ? JSON.stringify(bodyValues) : null,
-            //signal: controller.signal,
         },
         TEST: {
             method: requestMethod,
@@ -42,42 +40,38 @@ function CreateHeader(requestMethod, bodyValues = null, additionalHeaderValues =
                 'Content-Type': 'application/json',
             },
             body: null,
-            //signal: controller.signal,
         },
     };
     return requestOptions;
 }
-async function CallAPI(headerType, requestMethod, bodyValues = null, additional_header_values = null, apiUrl, apiArgs, pageCount) {
-    apiUrl += "?";
-    if (apiArgs) {
-        Object.entries(apiArgs).forEach(([key, value]) => {
-            apiUrl += `${key}=${value}&`;
-        });
-    }
-    apiUrl = pageCount ? apiUrl + pageCount : apiUrl.slice(0, -1);
-    for (let i = 0; i < 3;) {
-        //timeout for api calls
+
+function CallAPI(headerType, requestMethod, bodyValues = null, additional_header_values = null, apiUrl, apiArgs, pageCount) {
+    return new Promise((resolve, reject) => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-        try {
-            const reqOptions = CreateHeader(requestMethod, bodyValues, additional_header_values);
-            const response = await fetch(apiUrl,{ ...reqOptions[headerType], signal: controller.signal })
-            clearTimeout(timeoutId); // Only called on success
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            clearTimeout(timeoutId); // Ensure timeout is cleared
-            if (error.name === 'AbortError') {
-                console.warn(`Fetch aborted due to timeout (attempt ${i + 1}/3)`);
-                continue; // Retry
-            } 
-            console.error("Fetch error:", error);
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+        apiUrl += "?";
+        if (apiArgs) {
+            Object.entries(apiArgs).forEach(([key, value]) => {
+                apiUrl += `${key}=${value}&`;
+            });
         }
-    }
-    throw new Error("API call failed after 3 attempts.");
+        apiUrl = pageCount ? apiUrl + pageCount : apiUrl.slice(0, -1);
+
+        const reqOptions = CreateHeader(requestMethod, bodyValues, additional_header_values);
+        fetch(apiUrl, { ...reqOptions[headerType], signal: controller.signal })
+            .then(response => response.json())
+            .then(data => {
+                clearTimeout(timeoutId);
+                resolve(data);
+                LogInfo(`Response: ${data}`);
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+                LogInfo(`Fetch error: ${error}`, 'red');
+                reject(error);
+            });
+    });
 }
 async function Get_MultiPage_Request(Call_Object,) {
     maxPages = 1;

@@ -5,7 +5,7 @@ var fs = require('fs');
 var os = require('os');
 var path = require('path');
 
-const { Program_Switch } = require('./Utilities/Migration Tool.js');
+const { Program_Switch, Get_Int_Articles } = require('./Utilities/Migration Tool.js');
 const { LogInfo } = require('./Utilities/Logger.js');
 
 var port = 9929; //Math.floor(Math.random() * (8000 - 5000 + 1)) + 5000;
@@ -17,9 +17,25 @@ function StartServer() {
     const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     LogInfo(`Requested URL: ${req.url} at: ${clientIP}`);
     if (req.method === 'GET') {
-      const filePath = `.${req.url === '/' ? '/index.html' : req.url}`;
-      const contentType = getContentType(filePath);
-      serveStaticFile(filePath, contentType, res);
+      if (req.url === '/exportIntercom') {
+        LogInfo("Exporting Intercom articles");
+        Get_Int_Articles().then(articles => {
+          const json = JSON.stringify(articles, null, 2);
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Content-Disposition': 'attachment; filename="intercom-articles.json"'
+          });
+          res.end(json);
+        }).catch(err => {
+          LogInfo(`Export error: ${err}`, 'red');
+          res.writeHead(500, { 'Content-Type': 'text/plain' });
+          res.end('Export failed');
+        });
+      } else {
+        const filePath = `.${req.url === '/' ? '/index.html' : req.url}`;
+        const contentType = getContentType(filePath);
+        serveStaticFile(filePath, contentType, res);
+      }
     }
     else if (req.method === 'POST') {
       if (req.url === '/update&Create') {

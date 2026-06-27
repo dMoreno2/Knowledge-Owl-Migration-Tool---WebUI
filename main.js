@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const update_create = document.getElementById("update_create");
   const update = document.getElementById("update");
   const create = document.getElementById("create");
+  const exportIntercom = document.getElementById("exportIntercom");
 
   //update specific article
   const update_id = document.getElementById("updateSpecific_id");
@@ -169,6 +170,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
   });
+  exportIntercom.addEventListener("click", () => {
+    DisableButtons(true);
+    fetch('/exportIntercom')
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        return res.blob();
+      })
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'intercom-articles.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      })
+      .catch(err => console.error('Export error:', err))
+      .finally(() => DisableButtons(false));
+  });
+
   //remove article from intercom
   deleteArticle.addEventListener("click", () => {
     const inputValue = remove_article_id.value;
@@ -196,5 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateSpecific.disabled = state;
     createSpecific.disabled = state;
     deleteArticle.disabled = state;
+    exportIntercom.disabled = state;
   }
 });
